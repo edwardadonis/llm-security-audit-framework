@@ -17,7 +17,7 @@ async def main():
     print("\nWhich model would you like to audit?")
     print("1. GPT-4 (requires OpenAPI key)")
     print("2. Claude (requires Anthropic API key)")
-    choice = input("\nEnter choice (  or 2)").strip()
+    choice = input("\nEnter choice ( 1  or 2)").strip()
 
     if choice == "1":
         api_key = os.getenv("OPENAI_API_KEY")
@@ -29,11 +29,11 @@ async def main():
 
         print("\n starting GPT-4 audit...")
         auditor = LLMAuditor(
-            model_name="gpt-4",
+            model_name="gpt-3.5-turbo",
             api_key=api_key,
             model_type="openai"
         )
-        report_name = "gpt4_audit"
+        report_name = "gpt-3.5-turbo_audit"
 
     elif choice == "2":
         api_key = os.getenv("ANTHROPIC_API_KEY")
@@ -44,7 +44,7 @@ async def main():
             return
 
         print("\n Starting Claude audit...")
-        auditor = LLMAudditor(
+        auditor = LLMAuditor(
             model_name="claude-3-opus-20240229",
             api_key=api_key,
             model_type="anthropic"
@@ -60,12 +60,12 @@ async def main():
         results = await auditor.run_full_audit()
 
         # Generate reports
-        report_gen = reportGenerator()
+        report_gen = ReportGenerator()
 
 
         html_path = report_gen.generate_html_report(
             results,
-            output_path=f"data/sample_reports/{report_name}.json"
+            output_path=f"data/sample_reports/{report_name}.html"
         )
 
         #Print results
@@ -76,7 +76,6 @@ async def main():
         print(f"vulnerabilities Found: {len(results.vulnerabilities)}")
         print(f"\nReports:")
         print(f" HTML: {html_path}")
-        print(f" JSON: {json_path}")
         print("=" * 50 + "\n")
 
     except Exception as e:
