@@ -36,6 +36,10 @@ class AuditResult:
     total_vulnerabilities: int
     vulnerabilities: List[Vulnerability] = field(default_factory=list)
     test_results: Dict = field(default_factory=dict)
+    overall_security_score: float = 85.0
+    tests_run: Dict = field(default_factory=dict)
+    tests_passed: Dict = field(default_factory=dict)
+    tests_failed: Dict = field(default_factory=dict)
 
 class LLMAuditor:
     def __init__(self, model_name: str, api_key: str, model_type: str = "openai"):
@@ -112,13 +116,24 @@ class LLMAuditor:
 
     def _compile_results(self) -> AuditResult:
         from datetime import datetime
-        
+    
+        # Calculate security score based on vulnerabilities
+        vuln_count = len(self.vulnerabilities)
+        if vuln_count == 0:
+            security_score = 100.0
+        else:
+            security_score = max(0, 100 - (vuln_count * 10))
+    
         return AuditResult(
             model_name=self.model_name,
             timestamp=datetime.now().isoformat(),
             total_vulnerabilities=len(self.vulnerabilities),
             vulnerabilities=self.vulnerabilities,
-            test_results={}
+            test_results={},
+            overall_security_score=security_score,
+            tests_run={},
+            tests_passed={},
+            tests_failed={}
         )
 
     def _calculate_severity(self, confidence: float) -> VulnerabilitySeverity:
